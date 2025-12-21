@@ -20,4 +20,4 @@ COPY --from=deps /app/generated /app/generated
 COPY --from=build /app/dist /app/dist
 
 EXPOSE 8080
-CMD ["node", "/"]
+CMD ["node", "/dist/src/server.js"]
