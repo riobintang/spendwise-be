@@ -1,11 +1,10 @@
 import { Login, User } from "./user.type";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "../../generated/prisma/client";
 import createHttpError from "http-errors";
+import prisma from "../prisma/prisma";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
-const prisma = new PrismaClient();
 
 export async function register(data: {
   email: string;

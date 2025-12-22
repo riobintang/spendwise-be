@@ -2,7 +2,6 @@
 import { Wallet, WalletCreateInput, WalletUpdateInput } from "./wallet.type";
 import prisma from "../prisma/prisma";
 import { Decimal } from "@prisma/client/runtime/library";
-// import { $ZodNumber } from "zod/v4/core";
 import createHttpError from "http-errors";
 
 export async function listWallets(userId: number): Promise<Wallet[]> {

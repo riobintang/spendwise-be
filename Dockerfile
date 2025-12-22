@@ -1,23 +1,27 @@
 FROM node:24-alpine3.22 AS base
 
 WORKDIR /app
-COPY . .
 
-FROM base AS deps
+
+FROM base AS build-deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm install && npx prisma generate
-
-FROM base AS build
-WORKDIR /app
 COPY . .
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm install
+RUN --mount=type=secret,id=DATABASE_URL,env=DATABASE_URL npx prisma generate 
 RUN npm run build
+
+FROM base AS prod-deps
+WORKDIR /app
+COPY package*.json ./
+RUN --mount=type=cache,target=/root/.npm,sharing=locked npm ci --only=production
 
 FROM base AS prod
 WORKDIR /app
-COPY --from=deps /app/node_modules /app/node_modules
-COPY --from=deps /app/generated /app/generated
-COPY --from=build /app/dist /app/dist
+COPY --from=prod-deps /app/node_modules /app/node_modules
+COPY --from=build-deps /app/generated /app/generated
+COPY --from=build-deps /app/dist /app/dist
+COPY package*.json ./
 
 EXPOSE 8080
-CMD ["node", "/dist/src/server.js"]
+CMD ["node", "dist/src/server.js"]
