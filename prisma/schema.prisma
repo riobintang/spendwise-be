@@ -29,7 +29,6 @@ model Wallet {
 model Category {
   id           Int           @id @default(autoincrement())
   name         String
-  icon         String
   color        String
   type         CategoryType
   transactions Transaction[]
@@ -44,7 +43,7 @@ model Transaction {
   categoryId   Int
   type         CategoryType
   amount       Decimal      @db.Decimal(20, 2)
-  description  String
+  description  String?
   date         DateTime
   receiptImage String?
   createdAt    DateTime     @default(now())

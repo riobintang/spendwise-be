@@ -26,7 +26,6 @@ export async function createCategory(
       name: data.name,
       type: data.type,
       color: data.color,
-      icon: data.icon,
       userId,
     },
   });

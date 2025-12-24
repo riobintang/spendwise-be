@@ -6,7 +6,7 @@ export interface Transaction {
   categoryId: number;
   type: 'income' | 'expense';
   amount: Decimal;
-  description: string;
+  description?: string | null;
   date: Date; // ISO date format: YYYY-MM-DD
   receiptImage?: string | null;
   createdAt: Date; // ISO datetime
@@ -17,7 +17,7 @@ export interface TransactionCreateInput {
   categoryId: number;
   type: 'income' | 'expense';
   amount: number;
-  description: string;
+  description?: string | null;
   date: string; // ISO date format: YYYY-MM-DD
   receiptImage?: string | null | undefined;
   userId: number;
@@ -28,7 +28,7 @@ export interface TransactionUpdateInput {
   categoryId?: number;
   type?: 'income' | 'expense';
   amount?: number;
-  description?: string;
+  description?: string | null;
   date?: string; // ISO date format: YYYY-MM-DD
   receiptImage?: string | null;
 }

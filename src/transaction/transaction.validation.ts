@@ -5,13 +5,13 @@ export const transactionCreateSchema = z.object({
   categoryId: z.number(),
   type: z.enum(["income", "expense"]),
   amount: z.number(),
-  description: z.string().min(1),
+  description: z.string().nullish(),
   date: z.string().min(1),
 });
 
 export const transactionUpdateSchema = z.object({
   amount: z.number().optional(),
-  description: z.string().min(1).optional(),
+  description: z.string().nullish(),
 });
 
 export const transactionIdParamSchema = z.object({

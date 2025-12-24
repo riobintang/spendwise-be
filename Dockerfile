@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY . .
 RUN --mount=type=cache,target=/root/.npm,sharing=locked npm install
-RUN --mount=type=secret,id=DATABASE_URL,env=DATABASE_URL npx prisma generate 
+RUN npx prisma generate 
 RUN npm run build
 
 FROM base AS prod-deps
