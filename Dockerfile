@@ -21,6 +21,8 @@ WORKDIR /app
 COPY --from=prod-deps /app/node_modules /app/node_modules
 COPY --from=build-deps /app/generated /app/generated
 COPY --from=build-deps /app/dist /app/dist
+COPY --from=build-deps /app/prisma /app/prisma
+
 COPY package*.json ./
 
 EXPOSE 8080
