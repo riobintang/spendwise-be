@@ -20,7 +20,6 @@ export async function createCategory(
   data: CategoryCreateInput,
   userId: number
 ): Promise<Category> {
-  // TODO: Replace with Prisma create
   return await prisma.category.create({
     data: {
       name: data.name,

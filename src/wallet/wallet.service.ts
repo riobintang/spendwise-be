@@ -14,7 +14,6 @@ export async function createWallet(
   data: WalletCreateInput,
   userId: number
 ): Promise<Wallet> {
-  // TODO: Replace with Prisma create
   return await prisma.wallet.create({
     data: {
       name: data.name,

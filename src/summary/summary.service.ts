@@ -31,7 +31,7 @@ export async function getSummary(userId: number): Promise<{
     },
   };
 
-  const monthlySummaryMap: { [key: string]: MonthlySummary } = {};
+  const monthlySummaryMap: Map<string, MonthlySummary> = new Map();
 
   getTransaction.forEach((transaction) => {
     const date = new Date(transaction.date);
@@ -51,30 +51,26 @@ export async function getSummary(userId: number): Promise<{
       }
     }
 
-    if (!monthlySummaryMap[key]) {
-      monthlySummaryMap[key] = {
+    if (!monthlySummaryMap.has(key)) {
+      monthlySummaryMap.set(key, {
         month: month + 1,
-        // year,
         balance: new Decimal(0),
         income: new Decimal(0),
         expense: new Decimal(0),
-      };
+      });
     }
 
+    const summary = monthlySummaryMap.get(key)!;
     if (transaction.type === "income") {
-      monthlySummaryMap[key].income = monthlySummaryMap[key].income.add(
-        transaction.amount
-      );
+      summary.income = summary.income.add(transaction.amount);
     } else {
-      monthlySummaryMap[key].expense = monthlySummaryMap[key].expense.add(
-        transaction.amount
-      );
+      summary.expense = summary.expense.add(transaction.amount);
     }
   });
 
   return {
     current: currentSummary,
-    monthly: Object.values(monthlySummaryMap).sort((a, b) => {
+    monthly: Array.from(monthlySummaryMap.values()).sort((a, b) => {
       if (a.month === b.month) {
         return 0;
       }

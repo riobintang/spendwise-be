@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { json } from "express";
+import morgan from "morgan";
 
 // Import routes (to be implemented)
 import transactionRoutes from "./transaction/transaction.routes";
@@ -15,6 +16,9 @@ import createHttpError from "http-errors";
 dotenv.config();
 
 const app = express();
+
+// Logging middleware
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 app.use(cors());
 app.use(json());

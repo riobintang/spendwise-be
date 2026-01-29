@@ -1,3 +1,4 @@
+import { Prisma, PrismaClient } from "../../generated/prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
 import prisma from "../prisma/prisma";
 import {
@@ -12,39 +13,74 @@ interface ListTransactionsParams {
   startDate?: string;
   endDate?: string;
   categoryId?: string;
+  userId: number;
+}
+
+interface TransactionSummary {
+  totalIncome: number;
+  totalExpense: number;
+  balance: number;
+  byCategory: Record<string, number>;
+}
+
+interface ListTransactionsResult {
+  transactions: Transaction[];
+  summary: TransactionSummary;
 }
 
 export async function listTransactions(
-  params: ListTransactionsParams
-): Promise<any> {
-  // TODO: Replace with Prisma query
+  params: ListTransactionsParams,
+): Promise<ListTransactionsResult> {
+  const { startDate, endDate, categoryId, userId } = params;
+
+  const where: Prisma.TransactionWhereInput = { userId };
+  if (startDate || endDate) {
+    where.date = {};
+    if (startDate) where.date.gte = new Date(startDate);
+    if (endDate) where.date.lte = new Date(endDate);
+  }
+  if (categoryId) where.categoryId = parseInt(categoryId);
+
+  const transactions = await prisma.transaction.findMany({
+    where,
+    orderBy: { date: "desc" },
+  });
+
+  const summary = await calculateSummary(userId, where);
+
+  return { transactions, summary };
+}
+
+async function calculateSummary(
+  userId: number,
+  where: Prisma.TransactionWhereInput,
+): Promise<TransactionSummary> {
+  const transactions = await prisma.transaction.findMany({ where });
+
+  let totalIncome = new Decimal(0);
+  let totalExpense = new Decimal(0);
+  const byCategory: Record<string, number> = {};
+
+  for (const tx of transactions) {
+    if (tx.type === "income") {
+      totalIncome = totalIncome.add(tx.amount);
+    } else {
+      totalExpense = totalExpense.add(tx.amount);
+      const catId = tx.categoryId.toString();
+      byCategory[catId] = (byCategory[catId] || 0) + tx.amount.toNumber();
+    }
+  }
+
   return {
-    transactions: [
-      {
-        id: "1",
-        walletId: "default",
-        categoryId: "food",
-        type: "expense",
-        amount: 45.5,
-        description: "Lunch at restaurant",
-        date: "2024-01-15",
-        createdAt: "2024-01-15T12:30:00Z",
-      },
-    ],
-    summary: {
-      totalIncome: 5000,
-      totalExpense: 500,
-      balance: 4500,
-      byCategory: {
-        food: -150,
-        transport: -50,
-      },
-    },
+    totalIncome: totalIncome.toNumber(),
+    totalExpense: totalExpense.toNumber(),
+    balance: totalIncome.sub(totalExpense).toNumber(),
+    byCategory,
   };
 }
 
 export async function createTransaction(
-  data: TransactionCreateInput
+  data: TransactionCreateInput,
 ): Promise<Transaction> {
   // TODO: Replace with Prisma create
   const transaction = await prisma.transaction.create({
@@ -64,14 +100,14 @@ export async function createTransaction(
     data.type === "income"
       ? new Decimal(data.amount)
       : new Decimal(data.amount).negated(),
-    data.userId
+    data.userId,
   );
   return transaction;
 }
 
 export async function updateTransaction(
   id: number,
-  data: TransactionUpdateInput
+  data: TransactionUpdateInput,
 ): Promise<Transaction> {
   const getTransaction = await prisma.transaction.findUnique({
     where: { id },
@@ -106,7 +142,7 @@ export async function updateTransaction(
     await updateBalance(
       getTransaction.walletId,
       difference,
-      getTransaction.userId
+      getTransaction.userId,
     );
   }
   return updatedTransaction;
@@ -114,7 +150,7 @@ export async function updateTransaction(
 
 export async function deleteTransaction(
   id: number,
-  userId: number
+  userId: number,
 ): Promise<void> {
   const transaction = await prisma.transaction.findFirst({
     where: { id, userId: userId },
@@ -132,6 +168,6 @@ export async function deleteTransaction(
     transaction.type === "income"
       ? transaction.amount.negated()
       : transaction.amount,
-    userId
+    userId,
   );
 }
