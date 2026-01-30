@@ -19,11 +19,12 @@ export async function listTransactions(
 ) {
   try {
     const { startDate, endDate, categoryId } = req.query;
-    const user = req.user;
+    const userId = req.user.id;
     const result = await transactionService.listTransactions({
       startDate: startDate as string,
       endDate: endDate as string,
       categoryId: categoryId as string,
+      userId,
     });
     res
       .status(200)
