@@ -22,7 +22,7 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 app.use(cors());
 app.use(json());
-app.use("/users", userRoutes);
+app.use("/auth", userRoutes);
 
 app.use("/transactions", transactionRoutes);
 app.use("/categories", categoryRoutes);
