@@ -10,6 +10,7 @@ import transactionRoutes from "./transaction/transaction.routes";
 import categoryRoutes from "./category/category.routes";
 import walletRoutes from "./wallet/wallet.routes";
 import summaryRoutes from "./summary/summary.routes";
+import { checkHealth } from "./health/health.service";
 import { errorHandler } from "./middleware/error.middleware";
 import createHttpError from "http-errors";
 
@@ -22,6 +23,21 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 app.use(cors());
 app.use(json());
+
+app.get("/health", async (_req, res) => {
+  const health = await checkHealth();
+  const statusCode = health.status === "ok" ? 200 : 503;
+
+  return res.status(statusCode).json({
+    status: health.status,
+    data: health,
+    message:
+      health.status === "ok"
+        ? "Service and database are healthy"
+        : "Service is running but database is unavailable",
+  });
+});
+
 app.use("/auth", userRoutes);
 
 app.use("/transactions", transactionRoutes);
