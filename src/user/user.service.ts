@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import createHttpError from "http-errors";
 import prisma from "../prisma/prisma";
+import { uploadToS3, deleteFromS3 } from "../utils/s3/upload";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 
@@ -60,4 +61,39 @@ export async function login(data: {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
+}
+
+export async function updateProfilePhoto(
+  userId: number,
+  file: Express.Multer.File
+): Promise<{ profileImage: string }> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw createHttpError(404, "User not found");
+
+  if (user.profileImage) {
+    await deleteFromS3(user.profileImage);
+  }
+
+  const imageUrl = await uploadToS3(file, "profile", userId);
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { profileImage: imageUrl },
+  });
+
+  return { profileImage: updatedUser.profileImage! };
+}
+
+export async function deleteProfilePhoto(userId: number): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw createHttpError(404, "User not found");
+
+  if (user.profileImage) {
+    await deleteFromS3(user.profileImage);
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { profileImage: null },
+  });
 }
