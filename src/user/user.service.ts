@@ -97,3 +97,20 @@ export async function deleteProfilePhoto(userId: number): Promise<void> {
     data: { profileImage: null },
   });
 }
+
+export async function updateProfile(
+  userId: number,
+  data: { name: string }
+): Promise<Omit<User, "password">> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw createHttpError(404, "User not found");
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: { name: data.name },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, ...userWithoutPassword } = updatedUser;
+  return userWithoutPassword;
+}

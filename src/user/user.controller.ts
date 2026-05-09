@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as userService from "./user.service";
-import { registerSchema, loginSchema } from "./user.validation";
+import { registerSchema, loginSchema, updateProfileSchema } from "./user.validation";
 import { successResponse } from "../utils/ResponseBody";
 import createHttpError from "http-errors";
 
@@ -54,6 +54,21 @@ export async function deleteProfilePhoto(
     const userId = req.user!.id;
     await userService.deleteProfilePhoto(userId);
     res.status(200).json(successResponse("Profile photo deleted successfully", null));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateProfile(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const parsed = await updateProfileSchema.parseAsync(req.body);
+    const userId = req.user!.id;
+    const user = await userService.updateProfile(userId, parsed);
+    res.status(200).json(successResponse("Profile updated successfully", user));
   } catch (error) {
     next(error);
   }

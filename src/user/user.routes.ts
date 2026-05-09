@@ -9,5 +9,6 @@ router.post('/register', userController.register);
 router.post('/login', userController.login);
 router.put('/profile/photo', authMiddleware, upload.single('image'), userController.updateProfilePhoto);
 router.delete('/profile/photo', authMiddleware, userController.deleteProfilePhoto);
+router.put('/profile', authMiddleware, userController.updateProfile);
 
 export default router;
