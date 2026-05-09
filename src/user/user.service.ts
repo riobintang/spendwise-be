@@ -114,3 +114,21 @@ export async function updateProfile(
   const { password, ...userWithoutPassword } = updatedUser;
   return userWithoutPassword;
 }
+
+export async function changePassword(
+  userId: number,
+  data: { oldPassword: string; newPassword: string }
+): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw createHttpError(404, "User not found");
+
+  const valid = await bcrypt.compare(data.oldPassword, user.password);
+  if (!valid) throw createHttpError(401, "Incorrect old password");
+
+  const hashed = await bcrypt.hash(data.newPassword, 10);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashed },
+  });
+}

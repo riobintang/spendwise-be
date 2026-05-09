@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as userService from "./user.service";
-import { registerSchema, loginSchema, updateProfileSchema } from "./user.validation";
+import { registerSchema, loginSchema, updateProfileSchema, changePasswordSchema } from "./user.validation";
 import { successResponse } from "../utils/ResponseBody";
 import createHttpError from "http-errors";
 
@@ -69,6 +69,21 @@ export async function updateProfile(
     const userId = req.user!.id;
     const user = await userService.updateProfile(userId, parsed);
     res.status(200).json(successResponse("Profile updated successfully", user));
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function changePassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const parsed = await changePasswordSchema.parseAsync(req.body);
+    const userId = req.user!.id;
+    await userService.changePassword(userId, parsed);
+    res.status(200).json(successResponse("Password changed successfully", null));
   } catch (error) {
     next(error);
   }
