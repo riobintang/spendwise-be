@@ -21,7 +21,10 @@ const app = express();
 // Logging middleware
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 app.use(json());
 
 app.get("/health", async (_req, res) => {
