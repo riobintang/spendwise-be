@@ -6,7 +6,7 @@ export const transactionCreateSchema = z.object({
   type: z.enum(["income", "expense"]),
   amount: z.number(),
   description: z.string().nullish(),
-  date: z.string().min(1),
+  date: z.iso.date(),
 });
 
 export const transactionUpdateSchema = z.object({

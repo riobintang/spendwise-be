@@ -90,7 +90,7 @@ export async function createTransaction(
       type: data.type,
       amount: new Decimal(data.amount),
       description: data.description,
-      date: data.date,
+      date: new Date(data.date),
       userId: data.userId,
     },
   });
@@ -123,7 +123,7 @@ export async function updateTransaction(
       type: data.type ?? getTransaction.type,
       amount: data.amount ? new Decimal(data.amount) : getTransaction.amount,
       description: data.description ?? getTransaction.description,
-      date: data.date ?? getTransaction.date,
+      date: data.date ? new Date(data.date) : getTransaction.date,
     },
   });
 
